@@ -11,7 +11,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define CONSOLE_TIMEOUT 333333
+#define CONSOLE_TIMEOUT 1000000
 
 void menu(void)
 {
@@ -35,7 +35,7 @@ void loop(void)
 
     menu();
     spi_lights_init();
-    //spi_lights_set_single(1, 70, 0, 0);
+    spi_lights_set_single(1, 70, 0, 0);
     for (;;)
     {
         c = getchar_timeout_us(CONSOLE_TIMEOUT);
@@ -44,10 +44,9 @@ void loop(void)
         if (c == PICO_ERROR_TIMEOUT)
         {
             spi_lights_shift_up();
-            //if( rand() > ((RAND_MAX >> 5)*31))
             if ((rand() & 7) == 0)
             {
-                spi_lights_set_single(0, rand() & 63, rand() & 63, rand() & 63);
+                spi_lights_set_single_blinkmask(0, rand() & 15, rand() & 15, rand() & 15, rand());
             }
             printf("Loop Counter %i\n", counter);
             counter++;
