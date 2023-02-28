@@ -8,6 +8,9 @@
 #include "hardware/watchdog.h"
 #include "hardware/clocks.h"
 
+#include <time.h>
+#include <stdlib.h>
+
 #define CONSOLE_TIMEOUT 333333
 
 void menu(void)
@@ -28,9 +31,11 @@ void loop(void)
     int counter = 0;
     volatile int c; // make visible in debugger; avoid optimize out
 
+    srand(time(0));
+
     menu();
     spi_lights_init();
-    spi_lights_set_single(1, 70, 0, 0);
+    //spi_lights_set_single(1, 70, 0, 0);
     for (;;)
     {
         c = getchar_timeout_us(CONSOLE_TIMEOUT);
@@ -39,6 +44,11 @@ void loop(void)
         if (c == PICO_ERROR_TIMEOUT)
         {
             spi_lights_shift_up();
+            //if( rand() > ((RAND_MAX >> 5)*31))
+            if ((rand() & 7) == 0)
+            {
+                spi_lights_set_single(0, rand() & 63, rand() & 63, rand() & 63);
+            }
             printf("Loop Counter %i\n", counter);
             counter++;
         }
@@ -47,7 +57,7 @@ void loop(void)
             switch (c)
             {
             case 'r':
-                spi_lights_set_single(0, 255, 0, 0);
+                spi_lights_set_single(0, 83, 0, 0);
                 break;
             case ' ':
             case '0':
