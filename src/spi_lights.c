@@ -11,13 +11,14 @@
 #define SPI_TX_PIN 19
 #define LAMP_COUNT (3*8)
 #define STEP_COUNT 8
+#define STEP_COUNT_MASK 7
 
 unsigned short nibble_table[16];
 
 unsigned char step_lines[STEP_COUNT][3 * LAMP_COUNT];
 unsigned short act_nibbles[6 * LAMP_COUNT];
 
-void fill_table(void)
+static void fill_table(void)
 {
     for (int i = 0; i < 16; i++)
     {
@@ -83,7 +84,7 @@ static bool spi_lights_timer_callback(repeating_timer_t *pcallback_timer)
 {
     callback_counter++;
 
-    light_act_to_nibbles(step_lines[callback_counter & 7]);
+    light_act_to_nibbles(step_lines[callback_counter & STEP_COUNT_MASK]);
     spi_write16_blocking(spi0, act_nibbles, 6 * LAMP_COUNT);
 
     return true;
@@ -121,6 +122,18 @@ void spi_lights_set_single_blinkmask(int index, int r, int g, int b,
         blinkmask <<= 1;
     }
 }
+
+void spi_lights_set_single_cycler(int index, int colors[8][3] )
+{
+    for (int j = 0; j < STEP_COUNT; j++)
+    {
+        unsigned char *act_line = step_lines[j];
+        act_line[3 * index] = colors[j][0];
+        act_line[3 * index + 1] = colors[j][1];
+        act_line[3 * index + 2] = colors[j][2];
+    }
+}
+
 void spi_lights_set_single(int index, int r, int g, int b)
 {
     for (int j = 0; j < STEP_COUNT; j++)
@@ -130,6 +143,19 @@ void spi_lights_set_single(int index, int r, int g, int b)
         act_line[3 * index + 1] = r;
         act_line[3 * index + 2] = b;
 
+    }
+}
+
+void spi_lights_off(void)
+{
+    for (int j = 0; j < STEP_COUNT; j++)
+    {
+        unsigned char *act_line = step_lines[j];
+
+        for (int i = 0; i < 3 * LAMP_COUNT; i++)
+        {
+            act_line[i] = 0;
+        }
     }
 }
 
