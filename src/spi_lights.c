@@ -123,7 +123,7 @@ void spi_lights_set_single_blinkmask(int index, int r, int g, int b,
     }
 }
 
-void spi_lights_set_single_cycler(int index, int colors[8][3] )
+void spi_lights_set_single_cycler(int index, const int colors[8][3] )
 {
     for (int j = 0; j < STEP_COUNT; j++)
     {
