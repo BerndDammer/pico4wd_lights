@@ -18,6 +18,14 @@ unsigned short nibble_table[16];
 unsigned char step_lines[STEP_COUNT][3 * LAMP_COUNT];
 unsigned short act_nibbles[6 * LAMP_COUNT];
 
+/**
+ * fills the encoding table
+ *
+ * converts 4 bit RGB Value int 12 bit for SPI Shift register
+ * encoding for WS2812B Lamp
+ * 1 -> 110
+ * 0 -> 100
+ */
 static void fill_table(void)
 {
     for (int i = 0; i < 16; i++)
@@ -59,6 +67,28 @@ static void fill_table(void)
     }
 }
 
+/**
+ * Every Lamp is controlled by 3 times 8 bit RGB Value
+ * The Full Line has 24 Lamps
+ *
+ * The SPI Clocks with 2,5 MHz
+ * A One is transmitted with 110 a Zero wit 100
+ *
+ * The Spi shift register can be Loaded with max 16 bits
+ * The SPI is programmed in 12 Bit Mode
+ *
+ * The 3*8 = 24 Bits are splitted in 6 Groups of 4 bits
+ * 4 bits of RGB Value is converted in 12 bit SPI value
+ *
+ * For every Lamp the SPI is loaded with 6 Times 12 Bit
+ *
+ * the
+ * act_nibbles
+ * has 6 Times short=16 bit per Lamp
+ *
+ * @param act_line
+ * pointer to 3 * 8 bit * 24 Lamps RGB Storage
+ */
 static void light_act_to_nibbles(unsigned char *act_line)
 {
     for (int i = 0; i < 3 * LAMP_COUNT; i++)
